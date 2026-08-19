@@ -1,0 +1,31 @@
+name: Build ASI Plugin
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Add MSVC to PATH
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+
+    - name: Compile C++ to ASI (DLL x86)
+      run: |
+        cl.exe /O2 /LD /EHsc dllmain.cpp /Fe:handling_mod.asi /link /MACHINE:X86 user32.lib kernel32.lib
+
+    - name: Upload ASI Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: handling_mod_asi
+        path: handling_mod.asi
